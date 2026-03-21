@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能量核心系统 - NEXUS CORE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="ai_alchemy.css?v=4">
+</head>
+<body>
+    <div class="hud-bg">
+        <div class="grid-overlay"></div>
+        <div class="scanline"></div>
+        <div class="corner-decor top-left"></div>
+        <div class="corner-decor top-right"></div>
+        <div class="corner-decor bottom-left"></div>
+        <div class="corner-decor bottom-right"></div>
+    </div>
+    
+    <nav class="hud-nav">
+        <div class="nav-brand">
+            <span class="brand-icon">◇</span>
+            <span class="brand-text">NEXUS</span>
+        </div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">数据矩阵</a>
+            <a href="chart.html" class="nav-link">图表系统</a>
+            <a href="ai.html" class="nav-link">AI生成</a>
+            <a href="ai_alchemy.html" class="nav-link active">核心系统</a>
+        </div>
+        <div class="nav-status">
+            <span class="status-dot"></span>
+            <span class="status-text">在线</span>
+        </div>
+    </nav>
+    
+    <main class="hud-main">
+        <header class="hud-header">
+            <h1 class="main-title">能量核心系统</h1>
+            <p class="sub-title">量子号码生成矩阵</p>
+        </header>
+        
+        <section class="core-section">
+            <div class="core-container">
+                <div class="orbit-track outer-track"></div>
+                <div class="orbit-track inner-track"></div>
+                
+                <div class="energy-core" id="energyCore">
+                    <div class="core-ring ring-1"></div>
+                    <div class="core-ring ring-2"></div>
+                    <div class="core-ring ring-3"></div>
+                    <div class="core-center">
+                        <div class="core-data" id="coreData">
+                            <span class="data-value">待机</span>
+                        </div>
+                        <div class="core-pulse"></div>
+                    </div>
+                    <div class="core-decor decor-1"></div>
+                    <div class="core-decor decor-2"></div>
+                    <div class="core-decor decor-3"></div>
+                    <div class="core-decor decor-4"></div>
+                </div>
+                
+                <div class="node-container" id="nodeContainer">
+                    <div class="data-node" data-param="hour" data-position="0">
+                        <div class="node-icon"><i class="bi bi-clock"></i></div>
+                        <div class="node-label">时辰</div>
+                        <div class="node-value" id="hourDisplay">--:--</div>
+                        <select id="hourSelect" class="node-select">
+                            <option value="">选择</option>
+                        </select>
+                    </div>
+                    
+                    <div class="data-node" data-param="province" data-position="1">
+                        <div class="node-icon"><i class="bi bi-geo-alt"></i></div>
+                        <div class="node-label">地区</div>
+                        <div class="node-value" id="provinceDisplay">--</div>
+                        <select id="provinceSelect" class="node-select">
+                            <option value="">选择</option>
+                        </select>
+                    </div>
+                    
+                    <div class="data-node" data-param="weather" data-position="2">
+                        <div class="node-icon"><i class="bi bi-cloud-sun"></i></div>
+                        <div class="node-label">天气</div>
+                        <div class="node-value" id="weatherDisplay">--</div>
+                        <select id="weatherSelect" class="node-select">
+                            <option value="">选择</option>
+                            <option value="sunny">晴</option>
+                            <option value="cloudy">多云</option>
+                            <option value="overcast">阴</option>
+                            <option value="lightRain">小雨</option>
+                            <option value="heavyRain">大雨</option>
+                            <option value="thunderstorm">雷雨</option>
+                            <option value="snow">雪</option>
+                            <option value="fog">雾</option>
+                        </select>
+                    </div>
+                    
+                    <div class="data-node" data-param="temperature" data-position="3">
+                        <div class="node-icon"><i class="bi bi-thermometer-half"></i></div>
+                        <div class="node-label">温度</div>
+                        <div class="node-value" id="tempDisplay">--°C</div>
+                        <input type="number" id="tempInput" class="node-input" min="-40" max="50" placeholder="°C">
+                    </div>
+                    
+                    <div class="data-node" data-param="humidity" data-position="4">
+                        <div class="node-icon"><i class="bi bi-droplet"></i></div>
+                        <div class="node-label">湿度</div>
+                        <div class="node-value" id="humidityDisplay">--%</div>
+                        <input type="number" id="humidityInput" class="node-input" min="0" max="100" placeholder="%">
+                    </div>
+                    
+                    <div class="data-node" data-param="windDir" data-position="5">
+                        <div class="node-icon"><i class="bi bi-compass"></i></div>
+                        <div class="node-label">风向</div>
+                        <div class="node-value" id="windDirDisplay">--</div>
+                        <select id="windDirSelect" class="node-select">
+                            <option value="">选择</option>
+                            <option value="E">东风</option>
+                            <option value="S">南风</option>
+                            <option value="W">西风</option>
+                            <option value="N">北风</option>
+                            <option value="SE">东南</option>
+                            <option value="SW">西南</option>
+                            <option value="NE">东北</option>
+                            <option value="NW">西北</option>
+                        </select>
+                    </div>
+                    
+                    <div class="data-node" data-param="windLevel" data-position="6">
+                        <div class="node-icon"><i class="bi bi-wind"></i></div>
+                        <div class="node-label">风力</div>
+                        <div class="node-value" id="windLevelDisplay">--级</div>
+                        <input type="number" id="windLevelInput" class="node-input" min="0" max="12" placeholder="级">
+                    </div>
+                    
+                    <div class="data-node" data-param="moonPhase" data-position="7">
+                        <div class="node-icon"><i class="bi bi-moon-stars"></i></div>
+                        <div class="node-label">月相</div>
+                        <div class="node-value" id="moonDisplay">--</div>
+                        <select id="moonSelect" class="node-select">
+                            <option value="">选择</option>
+                            <option value="newMoon">新月</option>
+                            <option value="waxingCrescent">蛾眉月</option>
+                            <option value="firstQuarter">上弦月</option>
+                            <option value="waxingGibbous">盈凸月</option>
+                            <option value="fullMoon">满月</option>
+                            <option value="waningGibbous">亏凸月</option>
+                            <option value="lastQuarter">下弦月</option>
+                            <option value="waningCrescent">残月</option>
+                        </select>
+                    </div>
+                    
+                    <div class="data-node" data-param="zodiac" data-position="8">
+                        <div class="node-icon"><i class="bi bi-dice-5"></i></div>
+                        <div class="node-label">生肖</div>
+                        <div class="node-value" id="zodiacDisplay">--</div>
+                        <select id="zodiacSelect" class="node-select">
+                            <option value="">选择</option>
+                            <option value="rat">鼠</option>
+                            <option value="ox">牛</option>
+                            <option value="tiger">虎</option>
+                            <option value="rabbit">兔</option>
+                            <option value="dragon">龙</option>
+                            <option value="snake">蛇</option>
+                            <option value="horse">马</option>
+                            <option value="goat">羊</option>
+                            <option value="monkey">猴</option>
+                            <option value="rooster">鸡</option>
+                            <option value="dog">狗</option>
+                            <option value="pig">猪</option>
+                        </select>
+                    </div>
+                    
+                    <div class="data-node" data-param="constellation" data-position="9">
+                        <div class="node-icon"><i class="bi bi-stars"></i></div>
+                        <div class="node-label">星座</div>
+                        <div class="node-value" id="constellationDisplay">--</div>
+                        <select id="constellationSelect" class="node-select">
+                            <option value="">选择</option>
+                            <option value="aries">白羊座</option>
+                            <option value="taurus">金牛座</option>
+                            <option value="gemini">双子座</option>
+                            <option value="cancer">巨蟹座</option>
+                            <option value="leo">狮子座</option>
+                            <option value="virgo">处女座</option>
+                            <option value="libra">天秤座</option>
+                            <option value="scorpio">天蝎座</option>
+                            <option value="sagittarius">射手座</option>
+                            <option value="capricorn">摩羯座</option>
+                            <option value="aquarius">水瓶座</option>
+                            <option value="pisces">双鱼座</option>
+                        </select>
+                    </div>
+                    
+                    <div class="data-node" data-param="mood" data-position="10">
+                        <div class="node-icon"><i class="bi bi-heart-pulse"></i></div>
+                        <div class="node-label">心情</div>
+                        <div class="node-value" id="moodDisplay">--</div>
+                        <select id="moodSelect" class="node-select">
+                            <option value="">选择</option>
+                            <option value="happy">开心</option>
+                            <option value="calm">平静</option>
+                            <option value="sad">忧郁</option>
+                            <option value="angry">愤怒</option>
+                            <option value="worried">忧虑</option>
+                            <option value="fearful">恐惧</option>
+                        </select>
+                    </div>
+                    
+                    <div class="data-node" data-param="luckyNumber" data-position="11">
+                        <div class="node-icon"><i class="bi bi-gem"></i></div>
+                        <div class="node-label">幸运数</div>
+                        <div class="node-value" id="luckyDisplay">--</div>
+                        <input type="number" id="luckyInput" class="node-input" min="0" max="99" placeholder="##">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <button class="btn-initiate" id="alchemyBtn">
+                    <span class="btn-border"></span>
+                    <span class="btn-content">
+                        <i class="bi bi-lightning-charge"></i>
+                        <span>启动</span>
+                    </span>
+                </button>
+                <button class="btn-reset" id="resetBtn">
+                    <span class="btn-border"></span>
+                    <span class="btn-content">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        <span>重置</span>
+                    </span>
+                </button>
+            </div>
+        </section>
+        
+        <section class="result-panel" id="resultSection">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="title-decor">[</span>
+                    <span>生成结果</span>
+                    <span class="title-decor">]</span>
+                </div>
+                <div class="panel-status">完成</div>
+            </div>
+            
+            <div class="result-display">
+                <div class="result-group front-zone">
+                    <div class="group-label">前区号码</div>
+                    <div class="number-matrix" id="frontBalls"></div>
+                </div>
+                
+                <div class="result-divider">
+                    <span class="divider-line"></span>
+                    <span class="divider-icon">◈</span>
+                    <span class="divider-line"></span>
+                </div>
+                
+                <div class="result-group back-zone">
+                    <div class="group-label">后区号码</div>
+                    <div class="number-matrix" id="backBalls"></div>
+                </div>
+            </div>
+            
+            <div class="element-analysis">
+                <div class="analysis-label">五行能量分布</div>
+                <div class="analysis-bar" id="elementBar">
+                    <div class="bar-segment water" style="--width: 20%"><span>水</span></div>
+                    <div class="bar-segment metal" style="--width: 20%"><span>金</span></div>
+                    <div class="bar-segment fire" style="--width: 20%"><span>火</span></div>
+                    <div class="bar-segment earth" style="--width: 20%"><span>土</span></div>
+                    <div class="bar-segment wood" style="--width: 20%"><span>木</span></div>
+                </div>
+            </div>
+            
+            <div class="result-actions">
+                <button class="btn-action" id="copyBtn">
+                    <i class="bi bi-clipboard"></i>
+                    <span>复制</span>
+                </button>
+                <button class="btn-action" id="regenerateBtn">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <span>重新生成</span>
+                </button>
+            </div>
+        </section>
+        
+        <footer class="hud-footer">
+            <div class="footer-left">
+                <span>能量核心 v2.0</span>
+                <span class="separator">|</span>
+                <span>量子矩阵已激活</span>
+            </div>
+            <div class="footer-right">
+                <span id="systemTime">00:00:00</span>
+            </div>
+        </footer>
+    </main>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-core">
+            <div class="loading-ring r1"></div>
+            <div class="loading-ring r2"></div>
+            <div class="loading-ring r3"></div>
+            <div class="loading-center">
+                <span class="loading-percent" id="loadingPercent">0%</span>
+            </div>
+        </div>
+        <div class="loading-text">
+            <span class="loading-status" id="loadingStatus">初始化中</span>
+            <span class="loading-desc" id="loadingDesc">系统就绪</span>
+        </div>
+    </div>
+    
+    <script src="ai_alchemy.js?v=4"></script>
+</body>
+</html>
