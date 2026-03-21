@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大乐透号码走势区间分布折线图</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            
+            --blue-color: #3498db;
+            --black-color: #2c3e50;
+            --red-color: #e74c3c;
+            --yellow-color: #f39c12;
+            --green-color: #2ecc71;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--secondary-color);
+        }
+        
+        .header {
+            background-color: white;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            padding: 20px 0;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+        }
+        
+        .main-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        .nav-item a {
+            font-weight: 500;
+            color: var(--secondary-color);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item a:hover, .nav-item a.active {
+            color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .filter-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        #distributionChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .element-badge {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .result-ball {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 0 8px;
+            line-height: 50px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: bounceIn 0.6s ease-out;
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 24px;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1 class="text-center mb-0">
+                <i class="bi bi-graph-up"></i> 大乐透区间分布折线图
+            </h1>
+            <p class="text-center mt-2 mb-0">大乐透前区35个号码按五行属性分为5个区间，分析号码属性分布趋势</p>
+            <div class="text-center mt-3">
+                <a href="index.html" class="btn btn-light me-2">
+                    <i class="bi bi-table"></i> 数据分析表
+                </a>
+                <a href="chart.html" class="btn btn-primary me-2">
+                    <i class="bi bi-graph-up"></i> 属性分布趋势图
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="filter-container">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="periodCount" class="form-label">显示期数</label>
+                    <select class="form-select" id="periodCount">
+                        <option value="20">最近20期</option>
+                        <option value="30">最近30期</option>
+                        <option value="50">最近50期</option>
+                        <option value="100" selected>最近100期</option>
+                        <option value="200">最近200期</option>
+                        <option value="0">全部</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="chartType" class="form-label">图表类型</label>
+                    <select class="form-select" id="chartType">
+                        <option value="line" selected>折线图</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="updateButton" class="form-label d-none">&nbsp;</label>
+                    <div class="btn-group w-100">
+                        <button id="updateData" class="btn btn-warning">
+                            <i class="bi bi-cloud-download"></i> 更新数据
+                        </button>
+                        <button id="updateButton" class="btn btn-primary">
+                            <i class="bi bi-arrow-clockwise"></i> 更新图表
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 图表容器 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-graph-up"></i> 大乐透号码属性分布趋势图
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 统计信息 -->
+        <div class="row mb-4">
+            <div class="col-md-2">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">分析期数</h5>
+                        <p class="card-text fs-4" id="totalPeriods">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center">
+                    <div class="card-body" style="background-color: rgba(52, 152, 219, 0.1);">
+                        <h5 class="card-title">蓝色(水)平均</h5>
+                        <p class="card-text fs-4" id="blueAvg">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center">
+                    <div class="card-body" style="background-color: rgba(44, 62, 80, 0.1);">
+                        <h5 class="card-title">黑色(金)平均</h5>
+                        <p class="card-text fs-4" id="blackAvg">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center">
+                    <div class="card-body" style="background-color: rgba(231, 76, 60, 0.1);">
+                        <h5 class="card-title">红色(火)平均</h5>
+                        <p class="card-text fs-4" id="redAvg">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center">
+                    <div class="card-body" style="background-color: rgba(243, 156, 18, 0.1);">
+                        <h5 class="card-title">黄色(土)平均</h5>
+                        <p class="card-text fs-4" id="yellowAvg">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center">
+                    <div class="card-body" style="background-color: rgba(46, 204, 113, 0.1);">
+                        <h5 class="card-title">绿色(木)平均</h5>
+                        <p class="card-text fs-4" id="greenAvg">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="bi bi-table"></i> 大乐透号码走势
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>期号</th>
+                                <th>开奖日期</th>
+                                <th>前区号码</th>
+                                <th>后区号码</th>
+                                <th>号码属性</th>
+                                <th>奇偶比</th>
+                                <th>质合比</th>
+                                <th>和值</th>
+                                <th>跨度</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- 数据将通过JavaScript动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container mt-4">
+        <div class="pagination-container">
+            <nav aria-label="Page navigation">
+                <ul class="pagination" id="pagination">
+                    <!-- 分页将通过JavaScript动态生成 -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- 更新数据模态框 -->
+    <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateModalLabel">
+                        <i class="bi bi-cloud-download"></i> 更新大乐透数据
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="updateStatus">准备更新最新开奖数据...</div>
+                    <div class="progress mt-3" id="updateProgressContainer" style="display: none;">
+                        <div class="progress-bar" id="updateProgress" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                    <div id="updateResult"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="confirmUpdate">
+                        <i class="bi bi-cloud-download"></i> 确认更新
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 检查Chart.js是否加载成功，如果没有则使用备用CDN
+        if (typeof Chart === 'undefined') {
+            console.log('主CDN加载失败，尝试备用CDN...');
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+            document.head.appendChild(script);
+        }
+    </script>
+    <script src="data.js?v=1"></script>
+    <script src="chart.js?v=1"></script>
+    <script>
+        // 等待所有资源加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM已加载');
+            
+            // 检查数据是否已加载
+            if (typeof lotteryData === 'undefined') {
+                console.error('数据未加载，请检查data.js文件');
+                showNotification('数据加载失败，请刷新页面重试', 'error');
+                return;
+            }
+            
+            console.log('数据已加载，记录数:', lotteryData.length);
+            
+            // 确保Chart库已加载
+            const checkChart = setInterval(function() {
+                if (typeof Chart !== 'undefined') {
+                    clearInterval(checkChart);
+                    console.log('Chart库已加载，开始初始化...');
+                    
+                    // 初始化图表
+                    if (typeof initializeChart === 'function') {
+                        initializeChart();
+                        console.log('图表初始化完成');
+                    }
+                } else {
+                    console.log('等待Chart库加载...');
+                }
+            }, 100);
+            
+            // 超时检查
+            setTimeout(function() {
+                if (typeof Chart === 'undefined') {
+                    clearInterval(checkChart);
+                    console.error('Chart库加载超时');
+                    showNotification('图表库加载失败，请检查网络连接', 'error');
+                }
+            }, 10000); // 10秒超时
+        });
+    </script>
+</body>
+</html>

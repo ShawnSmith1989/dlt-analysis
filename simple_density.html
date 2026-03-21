@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大乐透密度图</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        canvas {
+            width: 100% !important;
+            height: 500px !important;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f4fd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>大乐透号码密度分布图</h1>
+        
+        <div class="controls">
+            <label>显示期数：</label>
+            <select id="periodCount">
+                <option value="20">最近20期</option>
+                <option value="30" selected>最近30期</option>
+                <option value="50">最近50期</option>
+                <option value="100">最近100期</option>
+            </select>
+            <button onclick="updateChart()">更新图表</button>
+        </div>
+        
+        <canvas id="densityChart"></canvas>
+        
+        <div class="status" id="status">
+            正在加载图表...
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // 元素属性定义
+        const elementAttributes = {
+            1: '水', 2: '水', 3: '水', 4: '水', 5: '水', 6: '水', 7: '水',
+            8: '金', 9: '金', 10: '金', 11: '金', 12: '金', 13: '金', 14: '金',
+            15: '火', 16: '火', 17: '火', 18: '火', 19: '火', 20: '火', 21: '火',
+            22: '土', 23: '土', 24: '土', 25: '土', 26: '土', 27: '土', 28: '土',
+            29: '木', 30: '木', 31: '木', 32: '木', 33: '木', 34: '木', 35: '木'
+        };
+
+        // 颜色配置
+        const elementColors = {
+            '水': '#3498db',
+            '金': '#2c3e50',
+            '火': '#e74c3c',
+            '土': '#f39c12',
+            '木': '#2ecc71'
+        };
+
+        let chartInstance = null;
+
+        // 页面加载完成后初始化
+        window.onload = function() {
+            document.getElementById('status').textContent = '页面加载完成，正在初始化图表...';
+            
+            // 检查数据是否加载
+            if (typeof lotteryData === 'undefined') {
+                document.getElementById('status').textContent = '错误：数据未加载，请检查data.js文件';
+                return;
+            }
+            
+            document.getElementById('status').textContent = `数据加载完成，共${lotteryData.length}期记录`;
+            
+            // 初始化图表
+            updateChart();
+        };
+
+        // 更新图表函数
+        function updateChart() {
+            document.getElementById('status').textContent = '正在更新图表...';
+            
+            try {
+                // 获取显示期数
+                const periodCount = parseInt(document.getElementById('periodCount').value);
+                
+                // 获取数据
+                let data = [...lotteryData];
+                if (periodCount > 0 && periodCount < data.length) {
+                    data = data.slice(0, periodCount);
+                }
+                
+                // 反转数据，使最新的在前面
+                data = data.reverse();
+                
+                // 准备散点图数据
+                const datasets = [];
+                const properties = ['水', '金', '火', '土', '木'];
+                
+                // 为每个属性创建数据集
+                properties.forEach(property => {
+                    const dataPoints = [];
+                    
+                    data.forEach((item, index) => {
+                        item.frontNumbers.forEach(num => {
+                            if (elementAttributes[num] === property) {
+                                dataPoints.push({
+                                    x: index,
+                                    y: num,
+                                    period: item.period,
+                                    date: item.date
+                                });
+                            }
+                        });
+                    });
+                    
+                    datasets.push({
+                        label: `${property}属性`,
+                        data: dataPoints,
+                        backgroundColor: elementColors[property],
+                        borderColor: elementColors[property],
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    });
+                });
+                
+                // 销毁旧图表
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+                
+                // 创建新图表
+                const ctx = document.getElementById('densityChart').getContext('2d');
+                chartInstance = new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '期号 (最新在左侧)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        // 显示每期的期号
+                                        if (value >= 0 && value < data.length) {
+                                            return data[value].period;
+                                        }
+                                        return '';
+                                    },
+                                    maxTicksLimit: 15
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: '号码值'
+                                },
+                                min: 0,
+                                max: 36,
+                                ticks: {
+                                    stepSize: 7,
+                                    callback: function(value) {
+                                        // 在五行区间显示标签
+                                        if (value === 4) return '水(1-7)';
+                                        if (value === 11) return '金(8-14)';
+                                        if (value === 18) return '火(15-21)';
+                                        if (value === 25) return '土(22-28)';
+                                        if (value === 32) return '木(29-35)';
+                                        return '';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const point = context.raw;
+                                        return `${point.period}期: 号码${point.y} (${elementAttributes[point.y]}属性)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                document.getElementById('status').textContent = `图表更新成功！显示最近${data.length}期数据`;
+            } catch (error) {
+                document.getElementById('status').textContent = `错误：${error.message}`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "projectName": "dlt-analysis",
+  "projectType": "static",
+  "buildCommand": "",
+  "outputDirectory": "deploy",
+  "indexPage": "chart.html",
+  "routes": {
+    "/": "/chart.html"
+  },
+  "headers": {
+    "/*.js": {
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
+    "/*.css": {
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    }
+  }
+}

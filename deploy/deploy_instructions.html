@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大乐透分析工具 - 部署说明</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        .container {
+            max-width: 900px;
+            margin-top: 50px;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .step {
+            background-color: #e9f7ef;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1 class="display-4">大乐透分析工具</h1>
+            <p class="lead">部署到EdgeOne Pages指南</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="bi bi-cloud-upload"></i> EdgeOne Pages 部署指南</h3>
+            </div>
+            <div class="card-body">
+                <p>由于环境变量配置问题，我们提供以下两种部署方法：</p>
+                
+                <h4 class="mt-4">方法一：手动上传到EdgeOne Pages</h4>
+                <div class="step">
+                    <h5>步骤：</h5>
+                    <ol>
+                        <li>登录 <a href="https://console.cloud.tencent.com/edgeone" target="_blank">腾讯云EdgeOne控制台</a></li>
+                        <li>创建新项目或选择现有项目</li>
+                        <li>上传以下文件：
+                            <ul>
+                                <li>chart.html</li>
+                                <li>index.html</li>
+                                <li>chart.js</li>
+                                <li>data.js</li>
+                            </ul>
+                        </li>
+                        <li>设置默认首页为 <code>chart.html</code></li>
+                        <li>发布并获取访问URL</li>
+                    </ol>
+                </div>
+
+                <h4 class="mt-4">方法二：使用其他静态托管服务</h4>
+                <div class="step">
+                    <h5>推荐平台：</h5>
+                    <ul>
+                        <li><a href="https://pages.github.com/" target="_blank">GitHub Pages</a> - 免费且易于使用</li>
+                        <li><a href="https://vercel.com/" target="_blank">Vercel</a> - 优秀的静态网站托管</li>
+                        <li><a href="https://www.netlify.com/" target="_blank">Netlify</a> - 功能强大的静态网站平台</li>
+                    </ul>
+                    <p>上传deploy目录中的所有文件即可。</p>
+                </div>
+                
+                <div class="alert alert-info mt-4">
+                    <h5><i class="bi bi-info-circle"></i> 注意事项</h5>
+                    <ul class="mb-0">
+                        <li>这是静态部署版本，仅支持手动添加数据功能</li>
+                        <li>手动添加的数据仅在当前会话有效，刷新页面后会丢失</li>
+                        <li>如需永久保存数据，请定期更新data.js文件并重新部署</li>
+                    </ul>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="chart.html" class="btn btn-success btn-lg">
+                        <i class="bi bi-arrow-right-circle"></i> 访问大乐透分析工具
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h4 class="mb-0"><i class="bi bi-gear"></i> 文件列表</h4>
+            </div>
+            <div class="card-body">
+                <p>deploy目录中包含以下文件：</p>
+                <ul>
+                    <li><strong>chart.html</strong> - 主页面，包含分析工具</li>
+                    <li><strong>index.html</strong> - 简单的首页</li>
+                    <li><strong>chart.js</strong> - 图表相关的JavaScript代码</li>
+                    <li><strong>data.js</strong> - 彩票数据</li>
+                    <li><strong>README.md</strong> - 项目说明</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

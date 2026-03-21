@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手动添加开奖数据</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        .result-ball {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 5px;
+            line-height: 40px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .front-ball {
+            background-color: #e74c3c;
+        }
+        .back-ball {
+            background-color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">手动添加开奖数据</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>添加新开奖数据</h5>
+            </div>
+            <div class="card-body">
+                <form id="dataForm">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="period" class="form-label">期号</label>
+                            <input type="text" class="form-control" id="period" placeholder="例如: 25143" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="date" class="form-label">开奖日期</label>
+                            <input type="date" class="form-control" id="date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">前区号码</label>
+                        <div class="d-flex justify-content-center mb-2">
+                            <input type="number" class="form-control me-2" id="front1" min="1" max="35" placeholder="号码1" required>
+                            <input type="number" class="form-control me-2" id="front2" min="1" max="35" placeholder="号码2" required>
+                            <input type="number" class="form-control me-2" id="front3" min="1" max="35" placeholder="号码3" required>
+                            <input type="number" class="form-control me-2" id="front4" min="1" max="35" placeholder="号码4" required>
+                            <input type="number" class="form-control" id="front5" min="1" max="35" placeholder="号码5" required>
+                        </div>
+                        <div class="text-center" id="frontPreview"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">后区号码</label>
+                        <div class="d-flex justify-content-center mb-2">
+                            <input type="number" class="form-control me-2" id="back1" min="1" max="12" placeholder="号码1" required>
+                            <input type="number" class="form-control" id="back2" min="1" max="12" placeholder="号码2" required>
+                        </div>
+                        <div class="text-center" id="backPreview"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="validateNumbers" checked>
+                            <label class="form-check-label" for="validateNumbers">
+                                验证号码有效性
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> 添加数据
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                        <i class="bi bi-x-circle"></i> 清空表单
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>最近添加的数据</h5>
+            </div>
+            <div class="card-body">
+                <div id="recentData"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置今天的日期为默认值
+            document.getElementById('date').valueAsDate = new Date();
+            
+            // 添加输入事件监听器，实时预览号码
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`front${i}`).addEventListener('input', updateFrontPreview);
+            }
+            
+            for (let i = 1; i <= 2; i++) {
+                document.getElementById(`back${i}`).addEventListener('input', updateBackPreview);
+            }
+            
+            // 加载最近的数据
+            loadRecentData();
+            
+            // 添加表单提交事件
+            document.getElementById('dataForm').addEventListener('submit', handleFormSubmit);
+        });
+        
+        // 更新前区号码预览
+        function updateFrontPreview() {
+            const container = document.getElementById('frontPreview');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= 5; i++) {
+                const value = document.getElementById(`front${i}`).value;
+                if (value) {
+                    const ball = document.createElement('span');
+                    ball.className = 'result-ball front-ball';
+                    ball.textContent = value;
+                    container.appendChild(ball);
+                }
+            }
+        }
+        
+        // 更新后区号码预览
+        function updateBackPreview() {
+            const container = document.getElementById('backPreview');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= 2; i++) {
+                const value = document.getElementById(`back${i}`).value;
+                if (value) {
+                    const ball = document.createElement('span');
+                    ball.className = 'result-ball back-ball';
+                    ball.textContent = value;
+                    container.appendChild(ball);
+                }
+            }
+        }
+        
+        // 处理表单提交
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            // 获取表单数据
+            const period = document.getElementById('period').value.trim();
+            const date = document.getElementById('date').value;
+            
+            const frontNumbers = [];
+            for (let i = 1; i <= 5; i++) {
+                const value = parseInt(document.getElementById(`front${i}`).value);
+                if (value) {
+                    frontNumbers.push(value);
+                }
+            }
+            
+            const backNumbers = [];
+            for (let i = 1; i <= 2; i++) {
+                const value = parseInt(document.getElementById(`back${i}`).value);
+                if (value) {
+                    backNumbers.push(value);
+                }
+            }
+            
+            // 验证数据
+            if (document.getElementById('validateNumbers').checked) {
+                if (!validateData(period, frontNumbers, backNumbers)) {
+                    return;
+                }
+            }
+            
+            // 创建数据对象
+            const newData = {
+                period,
+                date,
+                frontNumbers,
+                backNumbers,
+                rawData: `${period} ${date} ${frontNumbers.join(' ')} ${backNumbers.join(' ')}`
+            };
+            
+            // 保存数据
+            saveData(newData);
+            
+            // 清空表单
+            clearForm();
+            
+            // 更新最近数据显示
+            loadRecentData();
+            
+            // 显示成功消息
+            showNotification('数据添加成功!', 'success');
+        }
+        
+        // 验证数据有效性
+        function validateData(period, frontNumbers, backNumbers) {
+            // 验证期号
+            if (!/^\d{4,6}$/.test(period)) {
+                showNotification('期号格式不正确，应为4-6位数字', 'danger');
+                return false;
+            }
+            
+            // 验证前区号码
+            if (frontNumbers.length !== 5) {
+                showNotification('前区号码必须为5个', 'danger');
+                return false;
+            }
+            
+            if (frontNumbers.some(n => n < 1 || n > 35)) {
+                showNotification('前区号码必须在1-35之间', 'danger');
+                return false;
+            }
+            
+            if (new Set(frontNumbers).size !== 5) {
+                showNotification('前区号码不能重复', 'danger');
+                return false;
+            }
+            
+            // 验证后区号码
+            if (backNumbers.length !== 2) {
+                showNotification('后区号码必须为2个', 'danger');
+                return false;
+            }
+            
+            if (backNumbers.some(n => n < 1 || n > 12)) {
+                showNotification('后区号码必须在1-12之间', 'danger');
+                return false;
+            }
+            
+            if (new Set(backNumbers).size !== 2) {
+                showNotification('后区号码不能重复', 'danger');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // 保存数据
+        function saveData(newData) {
+            // 加载现有数据
+            let existingData = [];
+            try {
+                const script = document.createElement('script');
+                script.src = `data.js?t=${Date.now()}`;
+                script.onload = function() {
+                    if (typeof lotteryData !== 'undefined') {
+                        existingData = lotteryData;
+                        
+                        // 检查是否已存在相同期号
+                        const existingIndex = existingData.findIndex(item => item.period === newData.period);
+                        if (existingIndex !== -1) {
+                            // 替换现有数据
+                            existingData[existingIndex] = newData;
+                        } else {
+                            // 添加新数据
+                            existingData.unshift(newData);
+                        }
+                        
+                        // 这里应该通过API保存到服务器，但作为示例，我们只显示数据
+                        console.log('保存数据:', existingData);
+                    }
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error('加载现有数据失败:', error);
+            }
+        }
+        
+        // 加载最近的数据
+        function loadRecentData() {
+            try {
+                const script = document.createElement('script');
+                script.src = `data.js?t=${Date.now()}`;
+                script.onload = function() {
+                    if (typeof lotteryData !== 'undefined') {
+                        const container = document.getElementById('recentData');
+                        container.innerHTML = '';
+                        
+                        // 显示最近5条数据
+                        const recentData = lotteryData.slice(0, 5);
+                        
+                        if (recentData.length === 0) {
+                            container.innerHTML = '<p class="text-muted">暂无数据</p>';
+                            return;
+                        }
+                        
+                        const table = document.createElement('table');
+                        table.className = 'table table-striped';
+                        
+                        // 表头
+                        const thead = document.createElement('thead');
+                        thead.innerHTML = `
+                            <tr>
+                                <th>期号</th>
+                                <th>开奖日期</th>
+                                <th>前区号码</th>
+                                <th>后区号码</th>
+                            </tr>
+                        `;
+                        table.appendChild(thead);
+                        
+                        // 表体
+                        const tbody = document.createElement('tbody');
+                        recentData.forEach(item => {
+                            const row = document.createElement('tr');
+                            
+                            // 期号
+                            const periodCell = document.createElement('td');
+                            periodCell.textContent = item.period;
+                            row.appendChild(periodCell);
+                            
+                            // 日期
+                            const dateCell = document.createElement('td');
+                            dateCell.textContent = item.date;
+                            row.appendChild(dateCell);
+                            
+                            // 前区号码
+                            const frontCell = document.createElement('td');
+                            item.frontNumbers.forEach(num => {
+                                const ball = document.createElement('span');
+                                ball.className = 'result-ball front-ball me-1';
+                                ball.textContent = num;
+                                frontCell.appendChild(ball);
+                            });
+                            row.appendChild(frontCell);
+                            
+                            // 后区号码
+                            const backCell = document.createElement('td');
+                            item.backNumbers.forEach(num => {
+                                const ball = document.createElement('span');
+                                ball.className = 'result-ball back-ball me-1';
+                                ball.textContent = num;
+                                backCell.appendChild(ball);
+                            });
+                            row.appendChild(backCell);
+                            
+                            tbody.appendChild(row);
+                        });
+                        
+                        table.appendChild(tbody);
+                        container.appendChild(table);
+                    }
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                document.getElementById('recentData').innerHTML = '<p class="text-danger">加载数据失败</p>';
+            }
+        }
+        
+        // 清空表单
+        function clearForm() {
+            document.getElementById('dataForm').reset();
+            document.getElementById('frontPreview').innerHTML = '';
+            document.getElementById('backPreview').innerHTML = '';
+            
+            // 重置日期为今天
+            document.getElementById('date').valueAsDate = new Date();
+        }
+        
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3`;
+            notification.style.zIndex = '9999';
+            notification.style.minWidth = '300px';
+            notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            notification.style.opacity = '0';
+            notification.style.transform = 'translate(-50%, -20px)';
+            notification.style.transition = 'opacity 0.3s, transform 0.3s';
+            
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translate(-50%, 0)';
+            }, 10);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translate(-50%, -20px)';
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

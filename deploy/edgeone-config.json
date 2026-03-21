@@ -1,0 +1,7 @@
+{
+  "projectName": "dlt-analysis",
+  "projectType": "static",
+  "buildCommand": "",
+  "outputDirectory": "deploy",
+  "indexPage": "chart.html"
+}
