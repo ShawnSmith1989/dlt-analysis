@@ -3,161 +3,412 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI智能号码生成器 - 大乐透</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>AI生成 - NEXUS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="hud-common.css?v=1">
     <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --accent-color: #e74c3c;
-            --light-bg: #f8f9fa;
-            --border-color: #dee2e6;
-            --blue-color: #3498db;
-            --black-color: #2c3e50;
-            --red-color: #e74c3c;
-            --yellow-color: #f39c12;
-            --green-color: #2ecc71;
+        .params-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
         }
         
-        body {
-            font-family: 'Microsoft YaHei', Arial, sans-serif;
-            background-color: var(--light-bg);
-            color: var(--secondary-color);
-        }
-        
-        .filter-container {
-            background-color: white;
-            border-radius: 10px;
+        .param-group {
+            background: var(--bg-card);
+            border: var(--border-subtle);
             padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         
-        .section-title {
-            font-size: 1.1rem;
+        .param-group-title {
+            font-family: var(--font-display);
+            font-size: 0.75rem;
             font-weight: 600;
-            color: var(--secondary-color);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent-primary);
             margin-bottom: 15px;
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--primary-color);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.15);
             display: flex;
             align-items: center;
+            gap: 8px;
         }
         
-        .section-title i {
-            margin-right: 10px;
-            color: var(--primary-color);
+        .param-group-title i {
+            font-size: 1rem;
         }
         
-        .form-label {
-            font-weight: 500;
-            font-size: 0.9rem;
-            color: var(--secondary-color);
+        .param-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
         }
         
-        .result-container {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            padding: 30px;
-            color: white;
-            text-align: center;
-            min-height: 200px;
+        .param-item {
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            gap: 6px;
+        }
+        
+        .param-item.full-width {
+            grid-column: span 2;
+        }
+        
+        .param-label {
+            font-family: var(--font-display);
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        
+        .param-value {
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+        
+        .param-display {
+            background: var(--bg-deep);
+            border: var(--border-subtle);
+            padding: 10px 15px;
+            display: flex;
             align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            justify-content: space-between;
+        }
+        
+        .result-section {
+            background: linear-gradient(145deg, rgba(0, 212, 255, 0.05), rgba(0, 136, 170, 0.02));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .result-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+        }
+        
+        .result-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(0, 212, 255, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .result-header {
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .result-title {
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--accent-primary);
+            margin-bottom: 5px;
+        }
+        
+        .result-subtitle {
+            font-family: var(--font-display);
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+        
+        .numbers-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .numbers-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .numbers-label {
+            font-family: var(--font-display);
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            width: 60px;
         }
         
         .result-ball {
-            display: inline-flex;
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
-            margin: 5px;
-            line-height: 50px;
-            text-align: center;
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            animation: bounceIn 0.6s ease-out;
-            justify-content: center;
+            display: flex;
             align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            background: #4a5568;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: ballAppear 0.5s ease-out backwards;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
         
-        @keyframes bounceIn {
-            0% { transform: scale(0); opacity: 0; }
-            60% { transform: scale(1.2); }
-            100% { transform: scale(1); opacity: 1; }
+        .result-ball::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 7px;
+            width: 12px;
+            height: 7px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            transform: rotate(-30deg);
         }
         
-        .result-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            margin-bottom: 10px;
+        .result-ball::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            right: 7px;
+            width: 8px;
+            height: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            transform: rotate(30deg);
+        }
+        
+        .result-ball.water {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: linear-gradient(145deg, rgba(30, 136, 229, 0.65), rgba(21, 101, 192, 0.8));
+            box-shadow: 0 3px 15px rgba(30, 136, 229, 0.5);
+        }
+        .result-ball.metal {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: linear-gradient(145deg, rgba(120, 144, 156, 0.65), rgba(84, 110, 122, 0.8));
+            box-shadow: 0 3px 15px rgba(120, 144, 156, 0.5);
+        }
+        .result-ball.fire {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: linear-gradient(145deg, rgba(239, 83, 80, 0.65), rgba(198, 40, 40, 0.8));
+            box-shadow: 0 3px 15px rgba(239, 83, 80, 0.5);
+        }
+        .result-ball.earth {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: linear-gradient(145deg, rgba(255, 152, 0, 0.65), rgba(230, 81, 0, 0.8));
+            box-shadow: 0 3px 15px rgba(255, 152, 0, 0.5);
+        }
+        .result-ball.wood {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: linear-gradient(145deg, rgba(76, 175, 80, 0.65), rgba(46, 125, 50, 0.8));
+            box-shadow: 0 3px 15px rgba(76, 175, 80, 0.5);
+        }
+        
+        .result-ball.back {
+            width: 40px;
+            height: 40px;
+            font-size: 0.95rem;
+        }
+        
+        .result-ball.back::before {
+            top: 3px;
+            left: 5px;
+            width: 10px;
+            height: 6px;
+        }
+        
+        .result-ball.back::after {
+            bottom: 3px;
+            right: 5px;
+            width: 6px;
+            height: 4px;
+        }
+        
+        @keyframes ballAppear {
+            from {
+                transform: scale(0) rotate(-180deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
         }
         
         .element-analysis {
             display: flex;
             justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 15px;
+            position: relative;
+            z-index: 1;
         }
         
-        .element-badge {
-            display: inline-flex;
+        .element-tag {
+            display: flex;
             align-items: center;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
+            gap: 6px;
+            padding: 6px 15px;
+            border: 1px solid;
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
         
-        .element-badge .dot {
-            width: 12px;
-            height: 12px;
+        .element-tag .dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            margin-right: 6px;
         }
         
-        .btn-generate {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border: none;
-            padding: 12px 40px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 30px;
-            transition: all 0.3s ease;
+        .element-tag.water { border-color: #1e88e5; color: #1e88e5; }
+        .element-tag.water .dot { background: #1e88e5; }
+        .element-tag.metal { border-color: #78909c; color: #78909c; }
+        .element-tag.metal .dot { background: #78909c; }
+        .element-tag.fire { border-color: #ef5350; color: #ef5350; }
+        .element-tag.fire .dot { background: #ef5350; }
+        .element-tag.earth { border-color: #ff9800; color: #ff9800; }
+        .element-tag.earth .dot { background: #ff9800; }
+        .element-tag.wood { border-color: #4caf50; color: #4caf50; }
+        .element-tag.wood .dot { background: #4caf50; }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            position: relative;
+            z-index: 1;
         }
         
-        .btn-generate:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+        .placeholder-content {
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
         }
         
-        .btn-copy {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
-            transition: all 0.3s ease;
+        .placeholder-icon {
+            font-size: 4rem;
+            color: var(--accent-primary);
+            opacity: 0.3;
+            margin-bottom: 20px;
         }
         
-        .btn-copy:hover {
-            background: rgba(255,255,255,0.3);
-            color: white;
+        .placeholder-text {
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        
+        .placeholder-hint {
+            font-family: var(--font-body);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            opacity: 0.6;
+            margin-top: 10px;
+        }
+        
+        .disclaimer {
+            background: rgba(255, 170, 0, 0.05);
+            border: 1px solid rgba(255, 170, 0, 0.2);
+            padding: 15px 20px;
+            margin-top: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .disclaimer i {
+            color: var(--status-warning);
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+        
+        .disclaimer-text {
+            font-family: var(--font-body);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .collapsible {
+            cursor: pointer;
+        }
+        
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .collapsible-header::after {
+            content: '\F282';
+            font-family: 'bootstrap-icons';
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: transform var(--transition-fast);
+        }
+        
+        .collapsible.collapsed .collapsible-header::after {
+            transform: rotate(-180deg);
+        }
+        
+        .collapsible-content {
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height var(--transition-normal);
+        }
+        
+        .collapsible.collapsed .collapsible-content {
+            max-height: 0;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 5, 8, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
         }
         
         .loading-spinner {
-            display: none;
             width: 60px;
             height: 60px;
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top-color: white;
+            border: 3px solid rgba(0, 212, 255, 0.2);
+            border-top-color: var(--accent-primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -166,176 +417,149 @@
             to { transform: rotate(360deg); }
         }
         
-        .disclaimer {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 10px;
-            padding: 15px 20px;
-            margin-top: 30px;
-            font-size: 0.9rem;
-            color: #856404;
+        .loading-text {
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent-primary);
+            margin-top: 15px;
         }
         
-        .disclaimer i {
-            margin-right: 8px;
+        @media (max-width: 1000px) {
+            .params-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
-        .collapsible-header {
-            cursor: pointer;
-            user-select: none;
-        }
-        
-        .collapsible-header::after {
-            content: '\F282';
-            font-family: 'bootstrap-icons';
-            margin-left: 10px;
-            transition: transform 0.3s ease;
-        }
-        
-        .collapsible-header.collapsed::after {
-            transform: rotate(-180deg);
-        }
-        
-        .collapsible-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-        
-        .collapsible-content.show {
-            max-height: 500px;
-        }
-        
-        .color-water { background-color: var(--blue-color); }
-        .color-metal { background-color: var(--black-color); }
-        .color-fire { background-color: var(--red-color); }
-        .color-earth { background-color: var(--yellow-color); }
-        .color-wood { background-color: var(--green-color); }
-        
-        .text-water { color: var(--blue-color); }
-        .text-metal { color: var(--black-color); }
-        .text-fire { color: var(--red-color); }
-        .text-earth { color: var(--yellow-color); }
-        .text-wood { color: var(--green-color); }
-        
-        .footer {
-            margin-top: 50px;
-            padding: 20px 0;
-            background-color: var(--secondary-color);
-            color: white;
-            text-align: center;
-        }
-        
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
+            .param-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .param-item.full-width {
+                grid-column: span 1;
+            }
+            
             .result-ball {
                 width: 40px;
                 height: 40px;
-                line-height: 40px;
-                font-size: 14px;
+                font-size: 0.95rem;
             }
             
-            .filter-container {
-                padding: 15px;
+            .result-ball.back {
+                width: 34px;
+                height: 34px;
+                font-size: 0.85rem;
+            }
+            
+            .numbers-row {
+                flex-wrap: wrap;
+                justify-content: center;
             }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
-        <div class="container">
-            <ul class="nav nav-pills mx-auto">
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="index.html">
-                        <i class="bi bi-table"></i> 数据分析表
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="chart.html">
-                        <i class="bi bi-graph-up"></i> 区间分布折线图
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active text-white" href="ai.html">
-                        <i class="bi bi-magic"></i> AI号码生成
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="ai_alchemy.html">
-                        <i class="bi bi-fire"></i> 炼金术
-                    </a>
-                </li>
-            </ul>
+    <div class="hud-bg">
+        <div class="grid-overlay"></div>
+        <div class="scanline"></div>
+        <div class="corner-decor top-left"></div>
+        <div class="corner-decor top-right"></div>
+        <div class="corner-decor bottom-left"></div>
+        <div class="corner-decor bottom-right"></div>
+    </div>
+    
+    <nav class="hud-nav">
+        <div class="nav-brand">
+            <span class="brand-icon">◇</span>
+            <span class="brand-text">NEXUS</span>
+        </div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">数据矩阵</a>
+            <a href="chart.html" class="nav-link">图表系统</a>
+            <a href="ai.html" class="nav-link active">AI生成</a>
+            <a href="ai_alchemy.html" class="nav-link">核心系统</a>
+        </div>
+        <div class="nav-status">
+            <span class="status-dot"></span>
+            <span class="status-text">在线</span>
         </div>
     </nav>
     
-    <div class="container py-4">
-        <div class="text-center mb-4">
-            <h2><i class="bi bi-magic text-primary"></i> AI智能号码生成器</h2>
-            <p class="text-muted">基于五行理论的个性化号码推荐系统</p>
-        </div>
+    <main class="hud-main">
+        <header class="hud-header">
+            <h1 class="main-title">AI生成</h1>
+            <p class="sub-title">基于五行理论的智能号码推荐</p>
+        </header>
         
-        <div class="filter-container">
+        <section class="hud-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="title-decor">[</span>
+                    <span>参数配置</span>
+                    <span class="title-decor">]</span>
+                </div>
+            </div>
+            
             <form id="aiForm">
-                <div class="row">
-                    <div class="col-lg-6 mb-4">
-                        <div class="section-title">
+                <div class="params-grid">
+                    <div class="param-group">
+                        <div class="param-group-title">
                             <i class="bi bi-clock"></i> 时间信息
                         </div>
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <label for="hour" class="form-label">时间点（小时）</label>
-                                <input type="number" class="form-control" id="hour" min="0" max="23" value="">
-                                <small class="text-muted">0-23时，自动获取当前时间</small>
+                        <div class="param-row">
+                            <div class="param-item">
+                                <label class="param-label">时间点（小时）</label>
+                                <input type="number" class="hud-input" id="hour" min="0" max="23" value="">
                             </div>
-                            <div class="col-6">
-                                <label class="form-label">对应时辰</label>
-                                <div id="shichenDisplay" class="form-control bg-light" readonly style="height: auto; min-height: 38px; line-height: 38px;">
+                            <div class="param-item">
+                                <label class="param-label">对应时辰</label>
+                                <div class="param-display">
                                     <span id="shichenText">--</span>
-                                    <span id="shichenElement" class="ms-2 badge">--</span>
+                                    <span class="hud-badge" id="shichenElement">--</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="col-lg-6 mb-4">
-                        <div class="section-title">
+                    <div class="param-group">
+                        <div class="param-group-title">
                             <i class="bi bi-geo-alt"></i> 位置信息
                         </div>
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <label for="province" class="form-label">省份</label>
-                                <select class="form-select" id="province">
+                        <div class="param-row">
+                            <div class="param-item">
+                                <label class="param-label">省份</label>
+                                <select class="hud-select" id="province">
                                     <option value="">请选择</option>
                                 </select>
                             </div>
-                            <div class="col-6">
-                                <label class="form-label">地域五行</label>
-                                <div id="locationElementDisplay" class="form-control bg-light" style="height: auto; min-height: 38px; line-height: 38px;">
+                            <div class="param-item">
+                                <label class="param-label">地域五行</label>
+                                <div class="param-display">
                                     <span id="locationElementText">--</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-12 mb-4">
-                        <div class="section-title collapsible-header" data-target="weatherCollapse">
-                            <i class="bi bi-cloud-sun"></i> 天气信息
+                    
+                    <div class="param-group collapsible" id="weatherGroup">
+                        <div class="param-group-title collapsible-header">
+                            <span><i class="bi bi-cloud-sun"></i> 天气信息</span>
                         </div>
-                        <div id="weatherCollapse" class="collapsible-content show">
-                            <div class="row g-3 mt-2">
-                                <div class="col-md-4 col-6">
-                                    <label for="temperature" class="form-label">温度 (℃)</label>
-                                    <input type="number" class="form-control" id="temperature" min="-40" max="50" placeholder="-40 ~ 50" value="22">
+                        <div class="collapsible-content">
+                            <div class="param-row">
+                                <div class="param-item">
+                                    <label class="param-label">温度 (℃)</label>
+                                    <input type="number" class="hud-input" id="temperature" min="-40" max="50" value="22">
                                 </div>
-                                <div class="col-md-4 col-6">
-                                    <label for="humidity" class="form-label">湿度 (%)</label>
-                                    <input type="number" class="form-control" id="humidity" min="0" max="100" placeholder="0 ~ 100" value="60">
+                                <div class="param-item">
+                                    <label class="param-label">湿度 (%)</label>
+                                    <input type="number" class="hud-input" id="humidity" min="0" max="100" value="60">
                                 </div>
-                                <div class="col-md-4 col-6">
-                                    <label for="weather" class="form-label">天气状况</label>
-                                    <select class="form-select" id="weather">
+                                <div class="param-item">
+                                    <label class="param-label">天气状况</label>
+                                    <select class="hud-select" id="weather">
                                         <option value="">请选择</option>
                                         <option value="sunny" selected>晴天</option>
                                         <option value="cloudy">多云</option>
@@ -348,9 +572,9 @@
                                         <option value="haze">霾</option>
                                     </select>
                                 </div>
-                                <div class="col-md-4 col-6">
-                                    <label for="windDir" class="form-label">风向</label>
-                                    <select class="form-select" id="windDir">
+                                <div class="param-item">
+                                    <label class="param-label">风向</label>
+                                    <select class="hud-select" id="windDir">
                                         <option value="">请选择</option>
                                         <option value="E">东风</option>
                                         <option value="SE">东南风</option>
@@ -362,13 +586,13 @@
                                         <option value="NE" selected>东北风</option>
                                     </select>
                                 </div>
-                                <div class="col-md-4 col-6">
-                                    <label for="windLevel" class="form-label">风级</label>
-                                    <input type="number" class="form-control" id="windLevel" min="0" max="12" placeholder="0 ~ 12" value="2">
+                                <div class="param-item">
+                                    <label class="param-label">风级</label>
+                                    <input type="number" class="hud-input" id="windLevel" min="0" max="12" value="2">
                                 </div>
-                                <div class="col-md-4 col-6">
-                                    <label for="moonPhase" class="form-label">月相</label>
-                                    <select class="form-select" id="moonPhase">
+                                <div class="param-item">
+                                    <label class="param-label">月相</label>
+                                    <select class="hud-select" id="moonPhase">
                                         <option value="">请选择</option>
                                         <option value="newMoon">新月</option>
                                         <option value="waxingCrescent">蛾眉月</option>
@@ -383,17 +607,15 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-lg-6 mb-4">
-                        <div class="section-title">
+                    
+                    <div class="param-group">
+                        <div class="param-group-title">
                             <i class="bi bi-person"></i> 个人信息
                         </div>
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <label for="zodiac" class="form-label">生肖</label>
-                                <select class="form-select" id="zodiac">
+                        <div class="param-row">
+                            <div class="param-item">
+                                <label class="param-label">生肖</label>
+                                <select class="hud-select" id="zodiac">
                                     <option value="">请选择</option>
                                     <option value="rat">鼠</option>
                                     <option value="ox">牛</option>
@@ -409,9 +631,9 @@
                                     <option value="pig">猪</option>
                                 </select>
                             </div>
-                            <div class="col-6">
-                                <label for="constellation" class="form-label">星座</label>
-                                <select class="form-select" id="constellation">
+                            <div class="param-item">
+                                <label class="param-label">星座</label>
+                                <select class="hud-select" id="constellation">
                                     <option value="">请选择</option>
                                     <option value="aries">白羊座</option>
                                     <option value="taurus">金牛座</option>
@@ -427,9 +649,9 @@
                                     <option value="pisces">双鱼座</option>
                                 </select>
                             </div>
-                            <div class="col-6">
-                                <label for="mood" class="form-label">心情状态</label>
-                                <select class="form-select" id="mood">
+                            <div class="param-item">
+                                <label class="param-label">心情状态</label>
+                                <select class="hud-select" id="mood">
                                     <option value="">请选择</option>
                                     <option value="happy" selected>开心/兴奋</option>
                                     <option value="calm">平静/安宁</option>
@@ -439,92 +661,88 @@
                                     <option value="fearful">恐惧/不安</option>
                                 </select>
                             </div>
-                            <div class="col-6">
-                                <label for="luckyNumber" class="form-label">幸运数字 (可选)</label>
-                                <input type="number" class="form-control" id="luckyNumber" min="0" max="99" placeholder="0 ~ 99" value="8">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-lg-6 mb-4">
-                        <div class="section-title collapsible-header collapsed" data-target="metaphysicsCollapse">
-                            <i class="bi bi-stars"></i> 玄学参数（可选）
-                        </div>
-                        <div id="metaphysicsCollapse" class="collapsible-content">
-                            <div class="row g-3 mt-2">
-                                <div class="col-6">
-                                    <label for="dreamType" class="form-label">梦境类型</label>
-                                    <select class="form-select" id="dreamType">
-                                        <option value="" selected>请选择</option>
-                                        <option value="water">梦见水</option>
-                                        <option value="fire">梦见火</option>
-                                        <option value="wood">梦见树木</option>
-                                        <option value="metal">梦见金属</option>
-                                        <option value="earth">梦见土地</option>
-                                        <option value="flying">梦见飞行</option>
-                                        <option value="falling">梦见坠落</option>
-                                        <option value="chasing">梦见追逐</option>
-                                    </select>
-                                </div>
-                                <div class="col-6">
-                                    <label for="intuitionNumber" class="form-label">直觉数字</label>
-                                    <input type="number" class="form-control" id="intuitionNumber" min="0" max="99" placeholder="脑海中浮现的数字" value="">
-                                </div>
+                            <div class="param-item">
+                                <label class="param-label">幸运数字</label>
+                                <input type="number" class="hud-input" id="luckyNumber" min="0" max="99" value="8">
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="text-center mt-4">
-                    <button type="button" class="btn btn-generate text-white" id="generateBtn">
+                <div class="hud-toolbar" style="margin-top: 25px; justify-content: center;">
+                    <button type="button" class="hud-btn primary" id="generateBtn">
                         <i class="bi bi-magic"></i> 生成号码
                     </button>
-                    <button type="button" class="btn btn-outline-secondary ms-2" id="resetBtn">
-                        <i class="bi bi-arrow-clockwise"></i> 重置
+                    <button type="button" class="hud-btn" id="resetBtn">
+                        <i class="bi bi-arrow-counterclockwise"></i> 重置
                     </button>
                 </div>
             </form>
-        </div>
+        </section>
         
-        <div class="result-container" id="resultContainer">
-            <div id="loadingSpinner" class="loading-spinner"></div>
+        <section class="hud-panel result-section" id="resultSection">
+            <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">计算中...</div>
+            </div>
+            
+            <div id="placeholderContent" class="placeholder-content">
+                <div class="placeholder-icon">
+                    <i class="bi bi-magic"></i>
+                </div>
+                <div class="placeholder-text">填写参数后点击生成</div>
+                <div class="placeholder-hint">参数越完整，推荐越精准</div>
+            </div>
+            
             <div id="resultContent" style="display: none;">
-                <div class="result-label">前区号码</div>
-                <div id="frontNumbers" class="mb-3"></div>
-                <div class="result-label">后区号码</div>
-                <div id="backNumbers" class="mb-3"></div>
+                <div class="result-header">
+                    <div class="result-title">生成结果</div>
+                    <div class="result-subtitle">AI智能推荐号码</div>
+                </div>
+                
+                <div class="numbers-display">
+                    <div class="numbers-row">
+                        <span class="numbers-label">前区</span>
+                        <div id="frontNumbers"></div>
+                    </div>
+                    <div class="numbers-row">
+                        <span class="numbers-label">后区</span>
+                        <div id="backNumbers"></div>
+                    </div>
+                </div>
+                
                 <div class="element-analysis" id="elementAnalysis"></div>
-                <div class="mt-4">
-                    <button class="btn btn-copy" id="copyBtn">
-                        <i class="bi bi-clipboard"></i> 复制号码
+                
+                <div class="action-buttons">
+                    <button class="hud-btn success" id="copyBtn">
+                        <i class="bi bi-clipboard"></i> 复制
                     </button>
-                    <button class="btn btn-copy ms-2" id="regenerateBtn">
+                    <button class="hud-btn primary" id="regenerateBtn">
                         <i class="bi bi-arrow-repeat"></i> 重新生成
                     </button>
                 </div>
             </div>
-            <div id="placeholderText">
-                <i class="bi bi-magic display-4 mb-3 d-block"></i>
-                <p>填写参数后点击"生成号码"</p>
-                <small class="opacity-75">参数越完整，推荐越精准</small>
+        </section>
+        
+        <div class="disclaimer">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <div class="disclaimer-text">
+                <strong>重要声明：</strong>本功能仅供娱乐参考，不构成任何投注建议。彩票中奖完全随机，任何号码生成方式都不能提高中奖概率。请理性购彩，量力而行。未满18周岁禁止购买彩票。
             </div>
         </div>
         
-        <div class="disclaimer">
-            <p class="mb-0">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                <strong>重要声明：</strong>本功能仅供娱乐参考，不构成任何投注建议。彩票中奖完全随机，任何号码生成方式都不能提高中奖概率。请理性购彩，量力而行。未满18周岁禁止购买彩票。
-            </p>
-        </div>
-    </div>
+        <footer class="hud-footer">
+            <div class="footer-left">
+                <span>NEXUS v2.0</span>
+                <span class="separator">|</span>
+                <span>AI系统已就绪</span>
+            </div>
+            <div class="footer-right">
+                <span id="currentTime">00:00:00</span>
+            </div>
+        </footer>
+    </main>
     
-    <div class="footer">
-        <div class="container">
-            <p>&copy; 2025 大乐透号码走势分析工具. 所有数据仅供参考，请理性购彩.</p>
-        </div>
-    </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="ai.js?v=2"></script>
+    <script src="ai-hud.js?v=1"></script>
 </body>
 </html>
