@@ -28,8 +28,7 @@
         <div class="nav-links">
             <a href="index.html" class="nav-link">数据矩阵</a>
             <a href="chart.html" class="nav-link">图表系统</a>
-            <a href="ai.html" class="nav-link">AI生成</a>
-            <a href="ai_alchemy.html" class="nav-link active">核心系统</a>
+            <a href="ai_alchemy.html" class="nav-link active">AI号码</a>
         </div>
         <div class="nav-status">
             <span class="status-dot"></span>
@@ -38,11 +37,6 @@
     </nav>
     
     <main class="hud-main">
-        <header class="hud-header">
-            <h1 class="main-title">能量核心系统</h1>
-            <p class="sub-title">量子号码生成矩阵</p>
-        </header>
-        
         <section class="core-section">
             <div class="core-container">
                 <div class="orbit-track outer-track"></div>
@@ -89,7 +83,7 @@
                         <div class="node-value" id="weatherDisplay">--</div>
                         <select id="weatherSelect" class="node-select">
                             <option value="">选择</option>
-                            <option value="sunny">晴</option>
+                            <option value="sunny" selected>晴</option>
                             <option value="cloudy">多云</option>
                             <option value="overcast">阴</option>
                             <option value="lightRain">小雨</option>
@@ -126,7 +120,7 @@
                             <option value="N">北风</option>
                             <option value="SE">东南</option>
                             <option value="SW">西南</option>
-                            <option value="NE">东北</option>
+                            <option value="NE" selected>东北</option>
                             <option value="NW">西北</option>
                         </select>
                     </div>
@@ -135,7 +129,7 @@
                         <div class="node-icon"><i class="bi bi-wind"></i></div>
                         <div class="node-label">风力</div>
                         <div class="node-value" id="windLevelDisplay">--级</div>
-                        <input type="number" id="windLevelInput" class="node-input" min="0" max="12" placeholder="级">
+                        <input type="number" id="windLevelInput" class="node-input" min="0" max="12" placeholder="级" value="2">
                     </div>
                     
                     <div class="data-node" data-param="moonPhase" data-position="7">
@@ -148,7 +142,7 @@
                             <option value="waxingCrescent">蛾眉月</option>
                             <option value="firstQuarter">上弦月</option>
                             <option value="waxingGibbous">盈凸月</option>
-                            <option value="fullMoon">满月</option>
+                            <option value="fullMoon" selected>满月</option>
                             <option value="waningGibbous">亏凸月</option>
                             <option value="lastQuarter">下弦月</option>
                             <option value="waningCrescent">残月</option>
@@ -165,7 +159,7 @@
                             <option value="ox">牛</option>
                             <option value="tiger">虎</option>
                             <option value="rabbit">兔</option>
-                            <option value="dragon">龙</option>
+                            <option value="dragon" selected>龙</option>
                             <option value="snake">蛇</option>
                             <option value="horse">马</option>
                             <option value="goat">羊</option>
@@ -188,7 +182,7 @@
                             <option value="cancer">巨蟹座</option>
                             <option value="leo">狮子座</option>
                             <option value="virgo">处女座</option>
-                            <option value="libra">天秤座</option>
+                            <option value="libra" selected>天秤座</option>
                             <option value="scorpio">天蝎座</option>
                             <option value="sagittarius">射手座</option>
                             <option value="capricorn">摩羯座</option>
@@ -203,7 +197,7 @@
                         <div class="node-value" id="moodDisplay">--</div>
                         <select id="moodSelect" class="node-select">
                             <option value="">选择</option>
-                            <option value="happy">开心</option>
+                            <option value="happy" selected>开心</option>
                             <option value="calm">平静</option>
                             <option value="sad">忧郁</option>
                             <option value="angry">愤怒</option>
@@ -216,7 +210,7 @@
                         <div class="node-icon"><i class="bi bi-gem"></i></div>
                         <div class="node-label">幸运数</div>
                         <div class="node-value" id="luckyDisplay">--</div>
-                        <input type="number" id="luckyInput" class="node-input" min="0" max="99" placeholder="##">
+                        <input type="number" id="luckyInput" class="node-input" min="0" max="9" placeholder="#" value="8">
                     </div>
                 </div>
             </div>

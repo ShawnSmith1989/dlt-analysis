@@ -516,10 +516,14 @@ function initElementChart() {
                             family: "'Rajdhani', sans-serif",
                             size: 10
                         },
+                        stepSize: 2,
                         callback: function(value) {
-                            const periods = this.chart.data.datasets[0]?.data || [];
-                            const item = periods.find(d => d.x === value);
-                            return item ? item.raw.period : '';
+                            const labels = this.chart.data.periodLabels || [];
+                            const index = Math.round(value);
+                            if (index >= 0 && index < labels.length && index % 2 === 0) {
+                                return labels[index];
+                            }
+                            return '';
                         }
                     },
                     grid: {
@@ -613,7 +617,9 @@ function updateElementChart() {
         pointStyle: 'circle'
     }));
     
+    const periodLabels = [];
     chartData.forEach((item, index) => {
+        periodLabels.push(item.period);
         item.frontNumbers.forEach(num => {
             let elementKey = 'water';
             if (num >= 8 && num <= 14) elementKey = 'metal';
@@ -624,7 +630,7 @@ function updateElementChart() {
             const datasetIndex = Object.keys(numberProperties).indexOf(elementKey);
             if (datasetIndex >= 0) {
                 datasets[datasetIndex].data.push({
-                    x: index + 1,
+                    x: index,
                     y: num,
                     raw: { period: item.period }
                 });
@@ -633,7 +639,8 @@ function updateElementChart() {
     });
     
     elementChart.data.datasets = datasets;
-    elementChart.options.scales.x.min = 0;
-    elementChart.options.scales.x.max = periodCount + 1;
+    elementChart.data.periodLabels = periodLabels;
+    elementChart.options.scales.x.min = -0.5;
+    elementChart.options.scales.x.max = periodCount - 0.5;
     elementChart.update();
 }

@@ -804,22 +804,23 @@
     function resetNodes() {
         selectedMaterials = {};
         
-        document.querySelectorAll('.node-select').forEach(select => {
-            select.selectedIndex = 0;
-        });
+        document.getElementById('weatherSelect').value = 'sunny';
+        document.getElementById('windDirSelect').value = 'NE';
+        document.getElementById('moonSelect').value = 'fullMoon';
+        document.getElementById('zodiacSelect').value = 'dragon';
+        document.getElementById('constellationSelect').value = 'libra';
+        document.getElementById('moodSelect').value = 'happy';
         
-        document.querySelectorAll('.node-input').forEach(input => {
-            input.value = '';
-        });
+        document.getElementById('tempInput').value = '22';
+        document.getElementById('humidityInput').value = '60';
+        document.getElementById('windLevelInput').value = '2';
+        document.getElementById('luckyInput').value = '8';
         
         document.querySelectorAll('.data-node').forEach(node => {
-            const param = node.dataset.param;
-            const valueEl = node.querySelector('.node-value');
-            if (valueEl && param) {
-                valueEl.textContent = DEFAULT_DISPLAY_VALUES[param] || '--';
-            }
             node.classList.remove('active');
         });
+        
+        initDefaultValues();
         
         const coreEl = document.getElementById('energyCore');
         if (coreEl) coreEl.classList.remove('processing');
@@ -909,6 +910,23 @@
     }
     
     /**
+     * 初始化默认值显示
+     * 2026-03-22: 为所有材料设置默认值并更新显示
+     */
+    function initDefaultValues() {
+        updateNodeDisplay('weather', 'sunny');
+        updateNodeDisplay('temperature', '22');
+        updateNodeDisplay('humidity', '60');
+        updateNodeDisplay('windDir', 'NE');
+        updateNodeDisplay('windLevel', '2');
+        updateNodeDisplay('moonPhase', 'fullMoon');
+        updateNodeDisplay('zodiac', 'dragon');
+        updateNodeDisplay('constellation', 'libra');
+        updateNodeDisplay('mood', 'happy');
+        updateNodeDisplay('luckyNumber', '8');
+    }
+    
+    /**
      * 初始化
      * 2026-03-21: 完全重写初始化逻辑
      */
@@ -917,6 +935,7 @@
         initHourSelect();
         initProvinceSelect();
         bindNodeEvents();
+        initDefaultValues();
         
         updateSystemTime();
         setInterval(updateSystemTime, 1000);

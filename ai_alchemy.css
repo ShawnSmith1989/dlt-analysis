@@ -54,7 +54,7 @@
     
     /* 布局 */
     --core-size: 200px;
-    --node-radius: 280px;
+    --node-radius: 220px;
     --node-size: 70px;
     
     /* 字体 */
@@ -306,7 +306,7 @@ body {
 
 /* ==================== 主内容区 ==================== */
 .hud-main {
-    padding: 20px 30px 40px;
+    padding: 0 30px 40px;
     max-width: 1400px;
     margin: 0 auto;
 }
@@ -342,7 +342,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px 0;
+    padding: 0;
 }
 
 .core-container {
