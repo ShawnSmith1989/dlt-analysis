@@ -144,6 +144,31 @@ git push origin main
 | 10-30s | CDN 全球同步 |
 | 30s+ | 用户可访问最新版本 |
 
+### 4.3 自动更新链路
+
+当前项目已接入 GitHub Actions 自动更新流程：
+
+```text
+GitHub Actions 定时任务 / 手动触发
+        ↓
+执行 node update_data.js
+        ↓
+更新 data.js 与 dlt_all.txt
+        ↓
+自动提交回 GitHub main
+        ↓
+Vercel 检测到新提交并自动部署
+        ↓
+ai3000.xin 获取最新静态数据
+```
+
+工作流文件位置：
+- `.github/workflows/auto-update-data.yml`
+
+触发方式：
+- 手动触发：GitHub 仓库 → Actions → Auto Update Lottery Data → Run workflow
+- 定时触发：每 6 小时自动执行一次
+
 ---
 
 ## 五、初始配置步骤
@@ -212,6 +237,11 @@ git push origin main
 - 选择项目 → Deployments
 - 点击具体部署查看日志
 
+### Q4: 自动更新没有生效？
+- 登录 GitHub 仓库 → Actions，检查 `Auto Update Lottery Data` 是否执行成功
+- 如果工作流成功但网站未更新，检查 Vercel 是否收到新的 commit 并完成部署
+- 如果工作流失败，优先查看 `Update lottery data` 步骤的报错信息
+
 ---
 
 ## 八、相关链接
@@ -223,4 +253,4 @@ git push origin main
 
 ---
 
-*最后更新：2026-03-28*
+*最后更新：2026-03-29*
