@@ -209,66 +209,6 @@
     let selectedMaterials = {};
     
     /**
-     * 音效上下文
-     */
-    let audioContext = null;
-    
-    /**
-     * 初始化音频上下文
-     */
-    function initAudio() {
-        try {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        } catch (e) {
-            console.warn('音频初始化失败:', e);
-        }
-    }
-    
-    /**
-     * 播放音效
-     */
-    function playSound(type) {
-        if (!audioContext) return;
-        
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        switch (type) {
-            case 'select':
-                oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.1);
-                gainNode.gain.setValueAtTime(0.08, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.1);
-                break;
-            case 'initiate':
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.5);
-                oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 1);
-                gainNode.gain.setValueAtTime(0.12, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 1);
-                break;
-            case 'success':
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(523, audioContext.currentTime);
-                oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1);
-                oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.2);
-                gainNode.gain.setValueAtTime(0.12, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.4);
-                break;
-        }
-    }
-    
-    /**
      * 初始化时辰选择器
      */
     function initHourSelect() {
@@ -449,7 +389,6 @@
         if (nodeEl) nodeEl.classList.add('active');
         selectedMaterials[param] = { value, element };
         
-        playSound('select');
         updateCoreStatus();
     }
     
@@ -721,8 +660,6 @@
             }
         }, 300);
         
-        playSound('initiate');
-        
         return progressInterval;
     }
     
@@ -773,8 +710,6 @@
         
         renderResult(result);
         if (resultPanel) resultPanel.classList.add('show');
-        
-        playSound('success');
         
         if (coreEl) {
             coreEl.classList.remove('processing');
@@ -931,7 +866,6 @@
      * 2026-03-21: 完全重写初始化逻辑
      */
     document.addEventListener('DOMContentLoaded', function() {
-        initAudio();
         initHourSelect();
         initProvinceSelect();
         bindNodeEvents();
@@ -947,7 +881,6 @@
         
         if (initiateBtn) {
             initiateBtn.addEventListener('click', function() {
-                initAudio();
                 startInitiate();
             });
         }
@@ -962,7 +895,6 @@
         
         if (regenerateBtn) {
             regenerateBtn.addEventListener('click', function() {
-                initAudio();
                 startInitiate();
             });
         }

@@ -49,18 +49,19 @@ let currentPage = 1;
 const itemsPerPage = 20;
 
 const API_URL = 'https://webapi.sporttery.cn/gateway/lottery/getHistoryPageListV1.qry?gameNo=85&provinceId=0&pageSize=20&isVerify=1&pageNo=1';
+const UPDATE_ENDPOINTS = ['/update_data', '/api/update_data'];
 
 document.addEventListener('DOMContentLoaded', initializeApp);
 
 async function initializeApp() {
     loadLocalData();
-    showHudNotification('正在检查最新开奖数据...', 'info');
-    await checkForUpdates();
     bindEvents();
     displayData();
     updateStatistics();
     initElementChart();
     startClock();
+    showHudNotification('正在检查最新开奖数据...', 'info');
+    checkForUpdates();
 }
 
 /**
@@ -204,25 +205,44 @@ async function mergeNewData(apiData) {
 }
 
 async function autoUpdateData() {
-    const response = await fetch('/update_data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'update' })
-    });
-
-    if (!response.ok) {
-        throw new Error(`更新接口请求失败: ${response.status}`);
+    const result = await requestUpdateData();
+    if (Array.isArray(result.mergedData) && result.mergedData.length > 0) {
+        loadDataIntoState(result.mergedData);
+    } else {
+        const latestData = await fetchLocalDataFile();
+        loadDataIntoState(latestData);
     }
-
-    const result = await response.json();
-    if (!result.success) {
-        throw new Error(result.message || '更新接口执行失败');
-    }
-
-    const latestData = await fetchLocalDataFile();
-    loadDataIntoState(latestData);
     updateDataView();
     return result;
+}
+
+async function requestUpdateData() {
+    let lastError = null;
+
+    for (const endpoint of UPDATE_ENDPOINTS) {
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'update' })
+            });
+
+            if (!response.ok) {
+                throw new Error(`更新接口请求失败: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (!result.success) {
+                throw new Error(result.message || '更新接口执行失败');
+            }
+
+            return result;
+        } catch (error) {
+            lastError = error;
+        }
+    }
+
+    throw lastError || new Error('未找到可用的更新接口');
 }
 
 function loadLocalData() {

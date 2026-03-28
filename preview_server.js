@@ -6,6 +6,7 @@ const { spawn } = require('child_process');
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const PUBLIC_DIR = path.join(__dirname);
+const DATA_FILE = path.join(PUBLIC_DIR, 'data.js');
 
 // MIME类型映射
 const mimeTypes = {
@@ -70,6 +71,15 @@ function runUpdateScript(scriptName) {
   });
 }
 
+function loadCurrentData() {
+  const content = fs.readFileSync(DATA_FILE, 'utf8');
+  const match = content.match(/const lotteryData = (\[[\s\S]*?\]);/);
+  if (!match || !match[1]) {
+    throw new Error('解析 data.js 失败');
+  }
+  return JSON.parse(match[1]);
+}
+
 async function handleUpdateRequest(req, res) {
   let body = '';
 
@@ -83,11 +93,14 @@ async function handleUpdateRequest(req, res) {
       const action = payload.action || 'update';
       const scriptName = action === 'update_missing' ? 'update_missing_data.js' : 'update_data.js';
       const result = await runUpdateScript(scriptName);
+      const mergedData = loadCurrentData();
 
       writeJson(res, 200, {
         success: true,
         message: action === 'update_missing' ? '缺失数据检查完成' : '数据更新成功',
-        output: result.stdout || result.stderr
+        output: result.stdout || result.stderr,
+        mergedData,
+        latestPeriod: mergedData[0] ? mergedData[0].period : null
       });
     } catch (error) {
       writeJson(res, 500, {
