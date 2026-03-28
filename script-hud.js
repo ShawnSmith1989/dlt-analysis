@@ -449,12 +449,20 @@ function updatePagination() {
 
 function updateStatistics() {
     updateTotalCount();
+    const statOddEven = document.getElementById('statOddEven');
+    const statPrime = document.getElementById('statPrime');
+    const statSum = document.getElementById('statSum');
+    const statSpan = document.getElementById('statSpan');
+
+    if (!statOddEven || !statPrime || !statSum || !statSpan) {
+        return;
+    }
     
     if (filteredData.length === 0) {
-        document.getElementById('statOddEven').textContent = '--';
-        document.getElementById('statPrime').textContent = '--';
-        document.getElementById('statSum').textContent = '--';
-        document.getElementById('statSpan').textContent = '--';
+        statOddEven.textContent = '--';
+        statPrime.textContent = '--';
+        statSum.textContent = '--';
+        statSpan.textContent = '--';
         return;
     }
     
@@ -477,14 +485,14 @@ function updateStatistics() {
     
     const avgOdd = (totalOdd / filteredData.length).toFixed(1);
     const avgEven = (totalEven / filteredData.length).toFixed(1);
-    document.getElementById('statOddEven').textContent = `${avgOdd}:${avgEven}`;
+    statOddEven.textContent = `${avgOdd}:${avgEven}`;
     
     const avgPrime = (totalPrime / filteredData.length).toFixed(1);
     const avgComposite = (totalComposite / filteredData.length).toFixed(1);
-    document.getElementById('statPrime').textContent = `${avgPrime}:${avgComposite}`;
+    statPrime.textContent = `${avgPrime}:${avgComposite}`;
     
-    document.getElementById('statSum').textContent = Math.round(totalSum / filteredData.length);
-    document.getElementById('statSpan').textContent = Math.round(totalRange / filteredData.length);
+    statSum.textContent = Math.round(totalSum / filteredData.length);
+    statSpan.textContent = Math.round(totalRange / filteredData.length);
 }
 
 function updateTotalCount() {
@@ -811,8 +819,10 @@ function updateElementChart() {
         data: [],
         backgroundColor: elementColors[element],
         borderColor: elementColors[element].replace('0.75', '1'),
-        pointRadius: 1.5,
+        pointRadius: 2,
         pointHoverRadius: 3,
+        pointHitRadius: 4,
+        pointBorderWidth: 1,
         pointStyle: 'circle'
     }));
     

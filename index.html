@@ -10,48 +10,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="hud-common.css?v=1">
     <style>
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        
-        .stat-item {
-            background: var(--bg-panel);
-            border: var(--border-subtle);
+        .matrix-chart-panel .hud-chart-container {
+            height: 420px;
             padding: 20px;
-            text-align: center;
-            position: relative;
-        }
-        
-        .stat-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 2px;
-            background: var(--accent-primary);
-        }
-        
-        .stat-item .stat-value {
-            font-family: var(--font-display);
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--accent-primary);
-            text-shadow: var(--glow-soft);
-        }
-        
-        .stat-item .stat-label {
-            font-family: var(--font-display);
-            font-size: 0.6rem;
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            margin-top: 5px;
         }
         
         .number-cell {
@@ -194,18 +155,14 @@
                 font-size: 0.7rem;
             }
             
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+            .matrix-chart-panel .hud-chart-container {
+                height: 360px;
             }
         }
         
         @media (max-width: 600px) {
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .stat-item .stat-value {
-                font-size: 1.4rem;
+            .matrix-chart-panel .hud-chart-container {
+                height: 300px;
             }
             
             .hud-table th:nth-child(5),
@@ -248,37 +205,8 @@
     </nav>
     
     <main class="hud-main">
-        <section class="hud-panel">
-            <div class="panel-header">
-                <div class="panel-title">
-                    <span class="title-decor">[</span>
-                    <span>统计概览</span>
-                    <span class="title-decor">]</span>
-                </div>
-            </div>
-            
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-value" id="statOddEven">--</div>
-                    <div class="stat-label">平均奇偶比</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="statPrime">--</div>
-                    <div class="stat-label">平均质合比</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="statSum">--</div>
-                    <div class="stat-label">平均和值</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="statSpan">--</div>
-                    <div class="stat-label">平均跨度</div>
-                </div>
-            </div>
-        </section>
-        
-        <section class="hud-panel">
-            <div class="hud-chart-container" style="height: 280px; padding: 15px;">
+        <section class="hud-panel matrix-chart-panel">
+            <div class="hud-chart-container">
                 <canvas id="elementChart"></canvas>
             </div>
             <div class="element-legend" style="display: flex; justify-content: center; gap: 20px; margin-top: 15px; flex-wrap: wrap;">
