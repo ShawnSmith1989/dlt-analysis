@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const http = require('http');
+const { fetchFallbackData } = require('./update_data_fallback');
 
 // 文件路径
 const dataFile = path.join(__dirname, 'data.js');
@@ -248,11 +249,20 @@ async function updateLotteryData() {
         
         // 2. 获取网络最新数据
         console.log('获取网络最新数据...');
-        const apiData = await fetchLatestData();
-        console.log(`从API获取到 ${apiData.length} 条记录`);
-        
-        // 3. 转换数据格式
-        const newData = convertApiData(apiData);
+        let newData = [];
+        let sourceName = '官方接口';
+
+        try {
+            const apiData = await fetchLatestData();
+            console.log(`从官方接口获取到 ${apiData.length} 条记录`);
+            newData = convertApiData(apiData);
+        } catch (primaryError) {
+            console.warn(`官方接口获取失败: ${primaryError.message}`);
+            console.log('切换到备用数据源...');
+            newData = await fetchFallbackData();
+            sourceName = '福建体彩历史开奖页';
+            console.log(`从备用数据源获取到 ${newData.length} 条记录`);
+        }
         
         // 4. 合并数据
         console.log('合并新旧数据...');
@@ -261,12 +271,12 @@ async function updateLotteryData() {
         if (newCount > 0) {
             // 5. 更新文件
             updateDataFiles(mergedData);
-            console.log(`数据更新完成，新增 ${newCount} 条记录`);
+            console.log(`数据更新完成，来源 ${sourceName}，新增 ${newCount} 条记录`);
         } else {
-            console.log('没有新数据需要更新');
+            console.log(`没有新数据需要更新，来源 ${sourceName}`);
         }
         
-        return { success: true, newCount };
+        return { success: true, newCount, source: sourceName };
     } catch (error) {
         console.error('更新数据失败:', error.message);
         return { success: false, error: error.message };

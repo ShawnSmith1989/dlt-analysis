@@ -10,7 +10,7 @@ const dataFile = path.join(__dirname, 'data.js');
 const rawDataFile = path.join(__dirname, 'dlt_all.txt');
 
 // 备用API
-const FALLBACK_API_URL = 'https://www.cjcp.com.cn/kaijiang/dlt.shtml';
+const FALLBACK_API_URL = 'https://caipiao.eastmoney.com/Result/History/dlt';
 
 // 读取现有数据
 function readExistingData() {
@@ -35,12 +35,21 @@ function fetchFallbackData() {
     return new Promise((resolve, reject) => {
         const options = {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
             }
         };
         
         const req = https.get(FALLBACK_API_URL, options, (res) => {
             let data = '';
+
+            if (res.statusCode !== 200) {
+                reject(new Error(`备用源HTTP错误: ${res.statusCode} ${res.statusMessage}`));
+                return;
+            }
             
             res.on('data', (chunk) => {
                 data += chunk;
@@ -74,38 +83,52 @@ function fetchFallbackData() {
 
 // 从HTML中提取号码数据
 function extractNumbersFromHTML(html) {
-    // 这是一个简化的示例，实际实现需要根据具体的HTML结构来调整
     const numbers = [];
-    
-    // 查找包含开奖数据的HTML元素
-    // 这里需要根据实际HTML结构进行调整
-    const regex = /(\d{4})[\s\S]*?(\d{1,2})[\s\S]*?(\d{1,2})[\s\S]*?(\d{1,2})[\s\S]*?(\d{1,2})[\s\S]*?(\d{1,2})[\s\S]*?(\d{1,2})[\s\S]*?(\d{1,2})[\s\S]*?(\d{4}-\d{2}-\d{2})/g;
-    
+    const plainText = html
+        .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+        .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+        .replace(/&nbsp;|&#160;/gi, ' ')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    const regex = /(\d{5})\s*(\d{4}-\d{2}-\d{2})(?:\([^)]+\))?\s*详细\s*(\d{2})\s*(\d{2})\s*(\d{2})\s*(\d{2})\s*(\d{2})\s*(\d{2})\s*(\d{2})/g;
+
     let match;
-    while ((match = regex.exec(html)) !== null) {
+    while ((match = regex.exec(plainText)) !== null) {
         const period = match[1];
-        const date = match[8];
+        const date = match[2];
         const frontNumbers = [
-            parseInt(match[2]),
             parseInt(match[3]),
             parseInt(match[4]),
             parseInt(match[5]),
-            parseInt(match[6])
-        ];
-        const backNumbers = [
+            parseInt(match[6]),
             parseInt(match[7])
         ];
-        
+        const backNumbers = [
+            parseInt(match[8]),
+            parseInt(match[9])
+        ];
+
         numbers.push({
             period,
             date,
             frontNumbers,
             backNumbers,
-            rawData: `${period} ${date} ${frontNumbers.join(' ')} ${backNumbers.join(' ')}`
+            rawData: `${period} ${date} ${frontNumbers.map(n => n.toString().padStart(2, '0')).join(' ')} ${backNumbers.map(n => n.toString().padStart(2, '0')).join(' ')}`
         });
     }
-    
-    return numbers;
+
+    const deduplicated = [];
+    const seenPeriods = new Set();
+
+    for (const item of numbers) {
+        if (!seenPeriods.has(item.period)) {
+            deduplicated.push(item);
+            seenPeriods.add(item.period);
+        }
+    }
+
+    return deduplicated;
 }
 
 // 更新数据文件
