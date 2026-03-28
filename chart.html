@@ -341,16 +341,61 @@
         };
         
         let distributionChart = null;
+        let dataStore = typeof lotteryData !== 'undefined' ? [...lotteryData] : [];
         let currentData = [];
         let currentPage = 1;
         const itemsPerPage = 15;
         
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
+            await syncLatestData();
             initializeChart();
             loadTableData();
             bindEvents();
             startClock();
         });
+
+        async function syncLatestData() {
+            try {
+                const response = await fetch('/update_data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'update' })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`更新接口请求失败: ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || '更新接口执行失败');
+                }
+
+                dataStore = await fetchLocalDataFile();
+                return result;
+            } catch (error) {
+                console.warn('图表页自动更新失败:', error.message);
+                return null;
+            }
+        }
+
+        async function fetchLocalDataFile() {
+            const response = await fetch(`data.js?t=${Date.now()}`, {
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                throw new Error(`读取本地数据失败: ${response.status}`);
+            }
+
+            const text = await response.text();
+            const match = text.match(/const lotteryData = (\[[\s\S]*?\]);/);
+            if (!match || !match[1]) {
+                throw new Error('解析本地数据失败');
+            }
+
+            return JSON.parse(match[1]);
+        }
         
         function initializeChart() {
             const ctx = document.getElementById('distributionChart').getContext('2d');
@@ -471,7 +516,7 @@
         }
         
         function prepareChartData(periodCount) {
-            let data = [...lotteryData];
+            let data = [...dataStore];
             
             if (periodCount > 0 && periodCount < data.length) {
                 data = data.slice(0, periodCount);
@@ -525,7 +570,7 @@
         
         function loadTableData() {
             const periodCount = parseInt(document.getElementById('periodCount').value);
-            let data = [...lotteryData];
+            let data = [...dataStore];
             
             if (periodCount > 0 && periodCount < data.length) {
                 data = data.slice(0, periodCount);
@@ -666,9 +711,26 @@
             setInterval(updateTime, 1000);
         }
         
+        async function handleManualUpdate() {
+            const updateButton = document.getElementById('updateButton');
+            const originalText = updateButton.textContent;
+
+            updateButton.disabled = true;
+            updateButton.textContent = '同步中';
+
+            await syncLatestData();
+            updateChart();
+
+            updateButton.textContent = '已同步';
+            setTimeout(() => {
+                updateButton.textContent = originalText;
+                updateButton.disabled = false;
+            }, 1200);
+        }
+
         function bindEvents() {
             document.getElementById('periodCount').addEventListener('change', updateChart);
-            document.getElementById('updateButton').addEventListener('click', updateChart);
+            document.getElementById('updateButton').addEventListener('click', handleManualUpdate);
         }
     </script>
 </body>

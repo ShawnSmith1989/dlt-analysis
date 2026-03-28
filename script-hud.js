@@ -9,6 +9,10 @@
  *   - 竖轴为号码大小，按五行属性分为五个刻度
  *   - 横轴为期数
  *   - 使用Chart.js实现散点图
+ * - 2026-03-24: 实现刷新页面自动获取最新开奖数据功能
+ *   - 添加fetchLatestData()前端直接从API获取数据
+ *   - 添加checkForUpdates()检查数据更新
+ *   - 添加错误处理和用户提示机制
  */
 
 const numberProperties = {
@@ -44,13 +48,14 @@ let filteredData = [];
 let currentPage = 1;
 const itemsPerPage = 20;
 
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
-});
+const API_URL = 'https://webapi.sporttery.cn/gateway/lottery/getHistoryPageListV1.qry?gameNo=85&provinceId=0&pageSize=20&isVerify=1&pageNo=1';
+
+document.addEventListener('DOMContentLoaded', initializeApp);
 
 async function initializeApp() {
-    await autoUpdateData();
     loadLocalData();
+    showHudNotification('正在检查最新开奖数据...', 'info');
+    await checkForUpdates();
     bindEvents();
     displayData();
     updateStatistics();
@@ -58,52 +63,211 @@ async function initializeApp() {
     startClock();
 }
 
-async function autoUpdateData() {
+/**
+ * 检查数据更新 - 2026-03-24新增
+ * 优先尝试前端直接获取，失败则尝试后端接口
+ */
+async function checkForUpdates() {
+    const currentLatestPeriod = allData.length > 0 ? allData[0].period : '0';
+
     try {
-        const response = await fetch('/update_data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'update' })
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            if (result.success) {
-                console.log('自动更新成功:', result.message);
-                await reloadScript('data.js');
+        const result = await autoUpdateData();
+        const latestPeriod = allData.length > 0 ? allData[0].period : '0';
+
+        if (parseInt(latestPeriod) > parseInt(currentLatestPeriod)) {
+            showHudNotification(`数据更新成功！最新期号 ${latestPeriod}`, 'success');
+        } else if (result && result.message) {
+            showHudNotification(result.message, 'info');
+        } else {
+            showHudNotification('数据已是最新', 'info');
+        }
+        return true;
+    } catch (error) {
+        console.warn('后端更新失败，尝试前端直连:', error.message);
+    }
+
+    try {
+        const latestData = await fetchLatestDataFromAPI();
+        if (latestData && latestData.length > 0) {
+            const latestPeriod = latestData[0].lotteryDrawNum || latestData[0].period;
+            if (parseInt(latestPeriod) > parseInt(currentLatestPeriod)) {
+                const newRecords = await mergeNewData(latestData);
+                if (newRecords > 0) {
+                    updateDataView();
+                    showHudNotification(`已同步 ${newRecords} 条最新记录`, 'success');
+                    return true;
+                }
+            } else {
+                showHudNotification('数据已是最新', 'info');
+                return true;
             }
         }
     } catch (error) {
-        console.warn('自动更新数据时出错:', error.message);
+        console.warn('前端获取数据失败:', error.message);
     }
+
+    showHudNotification('自动更新失败，当前显示本地数据', 'error');
+    return false;
 }
 
-async function reloadScript(src) {
-    const oldScript = document.querySelector(`script[src*="${src}"]`);
-    if (oldScript) oldScript.remove();
-    
-    return new Promise((resolve) => {
+/**
+ * 从API直接获取最新数据 - 2026-03-24新增
+ * 使用JSONP方式绕过跨域限制
+ */
+function fetchLatestDataFromAPI() {
+    return new Promise((resolve, reject) => {
+        const callbackName = 'lotteryCallback_' + Date.now();
+        const url = `${API_URL}&callback=${callbackName}`;
+        
+        window[callbackName] = function(data) {
+            delete window[callbackName];
+            document.body.removeChild(script);
+            
+            try {
+                if (data.success && data.value && data.value.list) {
+                    resolve(data.value.list);
+                } else if (data.success && data.data && data.data.list) {
+                    resolve(data.data.list);
+                } else {
+                    reject(new Error('API返回数据格式不正确'));
+                }
+            } catch (e) {
+                reject(e);
+            }
+        };
+        
         const script = document.createElement('script');
-        script.src = `${src}?t=${Date.now()}`;
-        script.onload = () => resolve();
-        script.onerror = () => resolve();
+        script.src = url;
+        script.onerror = () => {
+            delete window[callbackName];
+            document.body.removeChild(script);
+            reject(new Error('网络请求失败'));
+        };
+        
+        const timeout = setTimeout(() => {
+            delete window[callbackName];
+            if (script.parentNode) {
+                document.body.removeChild(script);
+            }
+            reject(new Error('请求超时'));
+        }, 10000);
+        
+        script.onload = () => clearTimeout(timeout);
         document.body.appendChild(script);
     });
 }
 
+/**
+ * 合并新数据到现有数据 - 2026-03-24新增
+ */
+async function mergeNewData(apiData) {
+    if (!apiData || apiData.length === 0) return 0;
+    
+    const existingPeriods = new Set(allData.map(item => item.period));
+    let newCount = 0;
+    
+    const convertedData = apiData.map(item => {
+        const lotteryDrawNum = item.lotteryDrawNum;
+        const lotteryDrawResult = item.lotteryDrawResult;
+        const lotteryDrawTime = item.lotteryDrawTime;
+        
+        if (!lotteryDrawResult) return null;
+        
+        const numbers = lotteryDrawResult.split(' ');
+        if (numbers.length < 7) return null;
+        
+        return {
+            period: lotteryDrawNum,
+            date: lotteryDrawTime ? lotteryDrawTime.split(' ')[0] : '',
+            frontNumbers: numbers.slice(0, 5).map(n => parseInt(n)),
+            backNumbers: numbers.slice(5, 7).map(n => parseInt(n)),
+            rawData: `${lotteryDrawNum} ${lotteryDrawTime ? lotteryDrawTime.split(' ')[0] : ''} ${numbers.join(' ')}`
+        };
+    }).filter(item => item !== null);
+    
+    for (const item of convertedData) {
+        if (!existingPeriods.has(item.period)) {
+            const analysis = analyzeNumbers(item.frontNumbers, item.backNumbers);
+            allData.unshift({ ...item, ...analysis });
+            existingPeriods.add(item.period);
+            newCount++;
+        }
+    }
+    
+    if (newCount > 0) {
+        allData.sort((a, b) => parseInt(b.period) - parseInt(a.period));
+        filteredData = [...allData];
+        updateTotalCount();
+    }
+    
+    return newCount;
+}
+
+async function autoUpdateData() {
+    const response = await fetch('/update_data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update' })
+    });
+
+    if (!response.ok) {
+        throw new Error(`更新接口请求失败: ${response.status}`);
+    }
+
+    const result = await response.json();
+    if (!result.success) {
+        throw new Error(result.message || '更新接口执行失败');
+    }
+
+    const latestData = await fetchLocalDataFile();
+    loadDataIntoState(latestData);
+    updateDataView();
+    return result;
+}
+
 function loadLocalData() {
     if (typeof lotteryData !== 'undefined' && lotteryData.length > 0) {
-        allData = lotteryData.map(item => {
-            const analysis = analyzeNumbers(item.frontNumbers, item.backNumbers);
-            return { ...item, ...analysis };
-        });
-        
-        allData.sort((a, b) => new Date(b.date) - new Date(a.date));
-        filteredData = [...allData];
-        
+        loadDataIntoState(lotteryData);
         updateTotalCount();
     } else {
-        showHudNotification('数据加载失败，请刷新页面重试');
+        showHudNotification('数据加载失败，请刷新页面重试', 'error');
+    }
+}
+
+function loadDataIntoState(data) {
+    allData = data.map(item => {
+        const analysis = analyzeNumbers(item.frontNumbers, item.backNumbers);
+        return { ...item, ...analysis };
+    });
+    allData.sort((a, b) => parseInt(b.period) - parseInt(a.period));
+    filteredData = [...allData];
+}
+
+async function fetchLocalDataFile() {
+    const response = await fetch(`data.js?t=${Date.now()}`, {
+        cache: 'no-store'
+    });
+
+    if (!response.ok) {
+        throw new Error(`读取本地数据失败: ${response.status}`);
+    }
+
+    const text = await response.text();
+    const match = text.match(/const lotteryData = (\[[\s\S]*?\]);/);
+    if (!match || !match[1]) {
+        throw new Error('解析本地数据失败');
+    }
+
+    return JSON.parse(match[1]);
+}
+
+function updateDataView() {
+    currentPage = 1;
+    displayData();
+    updateStatistics();
+    updateTotalCount();
+    if (elementChart) {
+        updateElementChart();
     }
 }
 
@@ -388,32 +552,47 @@ function hideUpdateModal() {
 }
 
 async function confirmUpdate() {
-    document.getElementById('confirmUpdate').disabled = true;
-    document.getElementById('updateStatus').textContent = '正在连接服务器...';
+    const confirmButton = document.getElementById('confirmUpdate');
+    const progressFill = document.getElementById('progressFill');
+    const updateResult = document.getElementById('updateResult');
+
+    confirmButton.disabled = true;
+    document.getElementById('updateStatus').textContent = '正在同步最新开奖数据...';
     document.getElementById('progressBar').style.display = 'block';
-    
+    updateResult.innerHTML = '';
+
     let progress = 0;
     const progressInterval = setInterval(() => {
-        progress = Math.min(progress + 5, 90);
-        document.getElementById('progressFill').style.width = `${progress}%`;
-    }, 100);
-    
-    setTimeout(() => {
+        progress = Math.min(progress + 8, 92);
+        progressFill.style.width = `${progress}%`;
+    }, 120);
+
+    try {
+        const result = await autoUpdateData();
         clearInterval(progressInterval);
-        document.getElementById('progressFill').style.width = '100%';
-        
-        document.getElementById('updateResult').innerHTML = `
+        progressFill.style.width = '100%';
+        document.getElementById('updateStatus').textContent = '同步完成';
+        updateResult.innerHTML = `
             <div style="color: var(--text-secondary); margin-top: 15px; font-size: 0.85rem; line-height: 1.8;">
-                <p style="color: var(--status-warning); margin-bottom: 10px;">◇ 浏览器环境限制</p>
-                <p>请在命令行执行以下命令更新数据：</p>
-                <code style="display: block; background: var(--bg-card); padding: 10px; margin: 10px 0; border: var(--border-subtle); font-family: var(--font-display); font-size: 0.8rem;">
-                    node update_data.js
-                </code>
+                <p style="color: var(--status-success); margin-bottom: 10px;">◇ 数据已同步</p>
+                <p>${result.message || '最新开奖数据已加载到当前页面'}</p>
             </div>
         `;
-        
-        document.getElementById('confirmUpdate').disabled = false;
-    }, 1500);
+        showHudNotification('数据同步完成');
+    } catch (error) {
+        clearInterval(progressInterval);
+        progressFill.style.width = '100%';
+        document.getElementById('updateStatus').textContent = '同步失败';
+        updateResult.innerHTML = `
+            <div style="color: var(--text-secondary); margin-top: 15px; font-size: 0.85rem; line-height: 1.8;">
+                <p style="color: var(--status-danger, #ff6b6b); margin-bottom: 10px;">◇ 更新失败</p>
+                <p>${error.message}</p>
+            </div>
+        `;
+        showHudNotification('数据同步失败', 'error');
+    } finally {
+        confirmButton.disabled = false;
+    }
 }
 
 function startClock() {
